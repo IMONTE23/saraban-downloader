@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saraban Downloader</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      width: 360px;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 13px;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: white;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 10px; }
+
+    .header-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 2px 10px rgba(59,130,246,0.5);
+    }
+
+    .header-title { font-size: 15px; font-weight: 700; }
+    .header-sub   { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+    .status-pill {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.1);
+      color: #94a3b8;
+      transition: all 0.3s;
+    }
+    .status-pill.running {
+      background: rgba(34,197,94,0.2);
+      color: #86efac;
+    }
+
+    /* ── Settings panel ── */
+    .panel {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 16px;
+    }
+
+    .panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .setting-row:last-child { margin-bottom: 0; }
+
+    .setting-label {
+      font-size: 12px;
+      color: #374151;
+      font-weight: 500;
+    }
+    .setting-label small {
+      display: block;
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 400;
+      margin-top: 1px;
+    }
+
+    .setting-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="number"] {
+      width: 70px;
+      padding: 5px 8px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      color: #1e293b;
+      transition: border-color 0.15s;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    input[type="number"]:disabled {
+      background: #f1f5f9;
+      color: #94a3b8;
+    }
+
+    /* Toggle switch */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .toggle {
+      position: relative;
+      width: 34px; height: 18px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: #cbd5e1;
+      border-radius: 18px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 13px; height: 13px;
+      left: 2.5px; top: 2.5px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle input:checked + .toggle-slider { background: #3b82f6; }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* ── Buttons ── */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 9px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+    }
+
+    .btn:active:not(:disabled) { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-start {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      box-shadow: 0 3px 10px rgba(59,130,246,0.35);
+    }
+    .btn-start:hover:not(:disabled) { box-shadow: 0 5px 16px rgba(59,130,246,0.5); }
+
+    .btn-stop {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 3px 10px rgba(239,68,68,0.35);
+    }
+
+    /* ── Progress ── */
+    .progress-section {
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      display: none;
+    }
+    .progress-section.visible { display: block; }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .progress-label { font-size: 12px; color: #374151; font-weight: 500; }
+    .progress-count { font-size: 11px; color: #64748b; }
+
+    .progress-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #06b6d4);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Log ── */
+    .log-section {
+      background: #f8fafc;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    #log-list {
+      list-style: none;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    #log-list::-webkit-scrollbar { width: 3px; }
+    #log-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+    .log-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      animation: slidein 0.2s ease;
+      font-size: 12px;
+    }
+
+    @keyframes slidein {
+      from { opacity:0; transform:translateY(-4px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry.success { color: #15803d; }
+    .log-entry.warn    { color: #d97706; }
+    .log-entry.info    { color: #1d4ed8; }
+    .log-entry.error   { color: #dc2626; }
+
+    .log-icon { flex-shrink: 0; }
+
+    /* ── Empty ── */
+    .empty-log {
+      padding: 20px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">📥</div>
+    <div>
+      <div class="header-title">Saraban Downloader</div>
+      <div class="header-sub">ดาวน์โหลดเอกสาร PDF อัตโนมัติ</div>
+    </div>
+  </div>
+  <div class="status-pill" id="status-pill">Idle</div>
+</div>
+
+<!-- Settings -->
+<div class="panel">
+  <div class="panel-title">ตั้งค่าการดาวน์โหลด</div>
+
+  <div class="setting-row">
+    <div class="setting-label">
+      จำนวนแถวที่ดาวน์โหลด
+      <small>โหลดกี่แถวต่อครั้ง</small>
+    </div>
+    <div class="setting-right">
+      <input type="number" id="input-rows" value="10" min="1" max="9999">
+      <label class="toggle-wrap">
+        <span class="toggle">
+          <input type="checkbox" id="chk-all">
+          <span class="toggle-slider"></span>
+        </span>
+        ทั้งหมด
+      </label>
+    </div>
+  </div>
+
+  <div class="setting-row">
+    <div class="setting-label">
+      Delay ระหว่างแถว
+      <small>รอนานแค่ไหนก่อนแถวถัดไป (มิลลิวินาที)</small>
+    </div>
+    <div class="setting-right">
+      <input type="number" id="input-delay" value="1500" min="500" max="10000" step="100">
+      <span style="font-size:11px;color:#94a3b8">ms</span>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <button class="btn btn-start" id="btn-start">📥 เริ่มดาวน์โหลด</button>
+  <button class="btn btn-stop"  id="btn-stop" style="display:none">⏹ หยุด</button>
+</div>
+
+<!-- Progress -->
+<div class="progress-section" id="progress-section">
+  <div class="progress-header">
+    <div class="progress-label" id="progress-label">กำลังประมวลผล...</div>
+    <div class="progress-count" id="progress-count">0/0</div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<!-- Log -->
+<div class="log-section">
+  <div class="log-header">
+    <span>Activity Log</span>
+    <span id="log-count">0 รายการ</span>
+  </div>
+  <ul id="log-list">
+    <li class="empty-log">กด <strong>เริ่มดาวน์โหลด</strong> เพื่อเริ่มต้น</li>
+  </ul>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
