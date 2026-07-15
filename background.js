@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 // Intercept downloads and suggest the custom filename
 chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
-  if (nextFilename && (item.url.includes('nbtc.go.th') || item.referrer.includes('nbtc.go.th'))) {
+  if (nextFilename) {
     suggest({ filename: nextFilename, conflictAction: 'uniquify' });
     nextFilename = null; // Reset for next download
   } else {

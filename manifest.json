@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Saraban Downloader",
   "version": "1.0.0",
-  "description": "ดาวน์โหลดเอกสาร PDF อัตโนมัติทีละหลายแถว บน edoc.nbtc.go.th",
+  "description": "ดาวน์โหลดเอกสาร PDF อัตโนมัติทีละหลายแถว บนระบบสารบรรณอิเล็กทรอนิกส์",
   "permissions": [
     "activeTab",
     "scripting",
